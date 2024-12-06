@@ -1,5 +1,5 @@
 import * as fs from 'node:fs/promises'
-import { Encryptor } from '../utils/encryptor'
+import { Encryptor } from './encryptor'
 
 export const ensureBackupDirectoryExists = async () => {
   await fs.mkdir('./backup', { recursive: true })
@@ -12,7 +12,7 @@ export const writeEncryptedDataToFile = async (fileName: string, data: any) => {
   await fs.appendFile(fileName, Buffer.from(encryptedData), {
     encoding: 'utf8',
   })
-  console.log('done writing to file.')
+  console.log('done writing to file.', fileName)
 }
 
 export const generateFileName = (backupName: string, tableName: string) => {

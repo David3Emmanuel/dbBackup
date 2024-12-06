@@ -8,7 +8,7 @@ import {
   ensureBackupDirectoryExists,
   generateFileName,
   writeEncryptedDataToFile,
-} from './common'
+} from '../utils/backup'
 
 export const mongoDBHandler = async (data: Backup) => {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)

@@ -8,7 +8,7 @@ import {
   ensureBackupDirectoryExists,
   generateFileName,
   writeEncryptedDataToFile,
-} from './common'
+} from '../utils/backup'
 
 const query = `SELECT
     schemaname AS schema,
