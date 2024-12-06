@@ -93,6 +93,11 @@ export async function mongoDBRestoreHandler(
         upsert: true,
       },
     }))
+
+    if (overwrite) {
+      await db.collection(tableName).deleteMany({})
+    }
+
     await db.collection(tableName).bulkWrite(bulkOps)
     console.log(`Restored data to collection ${tableName}`)
     return tableName

@@ -111,10 +111,16 @@ export async function postgresRestoreHandler(
             .join(', ')})`,
       )
       .join(', ')
+
+    if (overwrite) {
+      await db.query(`TRUNCATE TABLE "${tableName}"`)
+    }
+
     const updateQuery = `INSERT INTO "${tableName}" (${columns}) VALUES ${values} ON CONFLICT (id) DO UPDATE SET ${columns
       .split(', ')
       .map((col) => `${col} = EXCLUDED.${col}`)
       .join(', ')}`
+
     await db.query(updateQuery)
     console.log(`Restored data to table ${tableName}`)
     return tableName
