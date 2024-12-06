@@ -9,7 +9,7 @@ app.use(express.json());
 
 app.post("/dump", validate(dumpSchemaValidator), dumpHandler);
 
-const PORT = 9000;
+const PORT = process.env.PORT ?? 9000;
 app.listen(PORT, () => {
   console.log(`Server started on ${PORT}`);
 });
