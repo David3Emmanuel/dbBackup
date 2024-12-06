@@ -40,14 +40,12 @@ export const postgresBackupHandler = async (data: Backup) => {
 
   let targetTables: Table[] = []
 
-  if (data.targetTables[0] !== '*') {
-    tables.forEach((table: Table) => {
-      if (data.targetTables.includes(table.name)) {
-        targetTables.push(table)
-      }
-    })
-  } else {
+  if (!data.targetTables || data.targetTables.length === 0) {
     targetTables = tables
+  } else {
+    targetTables = tables.filter((table: Table) =>
+      data.targetTables!.includes(table.name),
+    )
   }
   const versionId = Math.floor(Math.random() * 100)
 
@@ -89,7 +87,16 @@ export async function postgresRestoreHandler(
   const db = await connectToDb<PoolClient>(data, DbKind.Postgres)
 
   const { backupName, databaseName, targetTables, versionId } = data
-  const promises = targetTables.map(async (tableName) => {
+  let tablesToRestore: string[] = []
+
+  if (!targetTables || targetTables.length === 0) {
+    const result = await db.query(query)
+    tablesToRestore = result.rows.map((table: Table) => table.name)
+  } else {
+    tablesToRestore = targetTables
+  }
+
+  const promises = tablesToRestore.map(async (tableName) => {
     const fileName = generateFileName(
       backupName,
       databaseName,

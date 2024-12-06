@@ -28,7 +28,7 @@ export interface Backup {
   databaseName: string
   dbKind: string
   backupName: string
-  targetTables: string[]
+  targetTables?: string[]
   password: string
   useSrv?: boolean
   queryParams?: string

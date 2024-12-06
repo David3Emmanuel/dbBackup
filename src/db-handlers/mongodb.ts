@@ -24,14 +24,12 @@ export const mongoDBBackupHandler = async (data: Backup) => {
     | Pick<CollectionInfo, 'name' | 'type'>
   )[] = []
 
-  if (data.targetTables[0] !== '*') {
-    collections.forEach((collection) => {
-      if (data.targetTables.includes(collection.name)) {
-        targetCollections.push(collection)
-      }
-    })
-  } else {
+  if (!data.targetTables || data.targetTables.length === 0) {
     targetCollections = collections
+  } else {
+    targetCollections = collections.filter((collection) =>
+      data.targetTables!.includes(collection.name),
+    )
   }
 
   const versionId = Math.floor(Math.random() * 100)
@@ -72,7 +70,16 @@ export async function mongoDBRestoreHandler(data: Restore, overwrite: boolean) {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
 
   const { backupName, databaseName, targetTables, versionId } = data
-  const promises = targetTables.map(async (tableName) => {
+  let collectionsToRestore: string[] = []
+
+  if (!targetTables || targetTables.length === 0) {
+    const collections = await db.listCollections().toArray()
+    collectionsToRestore = collections.map((collection) => collection.name)
+  } else {
+    collectionsToRestore = targetTables
+  }
+
+  const promises = collectionsToRestore.map(async (tableName) => {
     const fileName = generateFileName(
       backupName,
       databaseName,

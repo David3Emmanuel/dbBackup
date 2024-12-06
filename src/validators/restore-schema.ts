@@ -11,7 +11,7 @@ export const restoreSchemaValidator = Joi.object({
     backupName: Joi.string(),
     dbKind: Joi.valid(DbKind.Postgres, DbKind.Mongodb).default(DbKind.Postgres),
     versionId: Joi.number().required(),
-    targetTables: Joi.array().items(Joi.string()).required(),
+    targetTables: Joi.array().items(Joi.string()),
     password: Joi.string().required(),
     useSrv: Joi.bool().default(false),
     queryParams: Joi.string(),
@@ -26,7 +26,7 @@ export interface Restore {
   dbKind: string
   backupName: string
   versionId: number
-  targetTables: string[]
+  targetTables?: string[]
   password: string
   useSrv?: boolean
   queryParams?: string
