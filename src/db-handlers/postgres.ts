@@ -9,6 +9,7 @@ import { DbKind } from '../types'
 import {
   deleteEncryptedDataFile,
   ensureBackupDirectoryExists,
+  FileName,
   generateFileName,
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
@@ -74,14 +75,14 @@ const backup = async ({
   db: PoolClient
   table: Table
   data: Backup
-  fileName: string
+  fileName: FileName
 }) => {
   const tableData = await db.query(`SELECT * FROM "${table.name}"`)
   const csvResult = json2csv(tableData.rows as any[])
 
-  await writeEncryptedDataToFile(fileName, csvResult)
+  await writeEncryptedDataToFile(fileName.localEncrypted, csvResult)
   await compressFile(fileName)
-  await deleteEncryptedDataFile(fileName)
+  await deleteEncryptedDataFile(fileName.localEncrypted)
 }
 
 export async function postgresRestoreHandler(
@@ -128,10 +129,10 @@ export async function postgresRestoreHandler(
   return Promise.all(promises)
 }
 
-async function restore(fileName: string) {
-  await uncompressFile(fileName + '.gz')
-  const data = await readDecryptedDataFromFile(fileName)
-  deleteEncryptedDataFile(fileName)
+async function restore(fileName: FileName) {
+  await uncompressFile(fileName)
+  const data = await readDecryptedDataFromFile(fileName.localEncrypted)
+  deleteEncryptedDataFile(fileName.localEncrypted)
   const contents = csv2json(data)
   return contents
 }

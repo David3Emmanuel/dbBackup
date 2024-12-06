@@ -58,7 +58,7 @@ const restoreHandler = async (req: Request, res: Response) => {
         results.push(result)
       }
     } catch (e) {
-      console.error({ error: e.message })
+      console.error(e)
       res.status(207)
       results.push({ error: e.message, versionId: restore.versionId })
     }

@@ -26,12 +26,23 @@ export const readDecryptedDataFromFile = async (fileName: string) => {
   return decryptedData
 }
 
-export const generateFileName = (
+export interface FileName {
+  localEncrypted: string
+  localCompressed: string
+  remoteCompressed: string
+}
+
+export function generateFileName(
   backupName: string,
   databaseName: string,
   tableName: string,
   versionId?: number,
-) => {
+): FileName {
   const versionId_ = versionId || Math.floor(Math.random() * 100)
-  return `./backup/${backupName}_${versionId_}_${databaseName}.${tableName}`
+  const baseFileName = `${backupName}_${versionId_}_${databaseName}.${tableName}`
+  return {
+    localEncrypted: `./backup/${baseFileName}`,
+    localCompressed: `./backup/${baseFileName}.gz`,
+    remoteCompressed: `${baseFileName}.gz`,
+  }
 }

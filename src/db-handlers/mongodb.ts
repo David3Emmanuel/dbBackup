@@ -9,6 +9,7 @@ import { CollectionInfo, Db as MongoDb } from 'mongodb'
 import {
   deleteEncryptedDataFile,
   ensureBackupDirectoryExists,
+  FileName,
   generateFileName,
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
@@ -58,14 +59,14 @@ const backup = async ({
 }: {
   db: MongoDb
   collection: any
-  fileName: string
+  fileName: FileName
 }) => {
   const collectionData = await db.collection(collection.name).find().toArray()
   const csvResult = json2csv(collectionData)
 
-  await writeEncryptedDataToFile(fileName, csvResult)
+  await writeEncryptedDataToFile(fileName.localEncrypted, csvResult)
   await compressFile(fileName)
-  await deleteEncryptedDataFile(fileName)
+  await deleteEncryptedDataFile(fileName.localEncrypted)
 }
 
 export async function mongoDBRestoreHandler(
@@ -105,10 +106,10 @@ export async function mongoDBRestoreHandler(
   return Promise.all(promises)
 }
 
-async function restore(fileName: string) {
-  await uncompressFile(fileName + '.gz')
-  const data = await readDecryptedDataFromFile(fileName)
-  deleteEncryptedDataFile(fileName)
+async function restore(fileName: FileName) {
+  await uncompressFile(fileName)
+  const data = await readDecryptedDataFromFile(fileName.localEncrypted)
+  deleteEncryptedDataFile(fileName.localEncrypted)
   const contents = csv2json(data)
   return contents
 }
