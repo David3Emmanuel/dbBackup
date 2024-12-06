@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises'
 import { Encryptor } from './encryptor'
 
 export const ensureBackupDirectoryExists = async () => {
-  await fs.mkdir('./backup', { recursive: true })
+  await fs.mkdir('.temp', { recursive: true })
 }
 
 export const writeEncryptedDataToFile = async (fileName: string, data: any) => {
@@ -12,7 +12,6 @@ export const writeEncryptedDataToFile = async (fileName: string, data: any) => {
   await fs.appendFile(fileName, Buffer.from(encryptedData), {
     encoding: 'utf8',
   })
-  console.log('done writing to file.', fileName)
 }
 
 export const deleteEncryptedDataFile = async (fileName: string) => {
@@ -41,8 +40,8 @@ export function generateFileName(
   const versionId_ = versionId || Math.floor(Math.random() * 100)
   const baseFileName = `${backupName}_${versionId_}_${databaseName}.${tableName}`
   return {
-    localEncrypted: `./backup/${baseFileName}`,
-    localCompressed: `./backup/${baseFileName}.gz`,
+    localEncrypted: `.temp/${baseFileName}`,
+    localCompressed: `.temp/${baseFileName}.gz`,
     remoteCompressed: `${baseFileName}.gz`,
   }
 }
