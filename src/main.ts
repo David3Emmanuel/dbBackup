@@ -29,6 +29,21 @@ generateDocs()
 
 app.use('/docs', swaggerRouter())
 
+app.use(
+  (
+    err: any,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error(err)
+    res.status(500).send({
+      success: false,
+      message: err.message ?? 'Something went wrong.',
+    })
+  },
+)
+
 const PORT = process.env.PORT ?? 9000
 app.listen(PORT, () => {
   console.log(`Server started on ${PORT}`)
