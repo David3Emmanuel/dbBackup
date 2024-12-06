@@ -1,13 +1,14 @@
 import { Backup } from '../validators'
 import { connectToDb } from './connect-to-db'
-import { pipeline } from 'node:stream'
-import * as fs from 'node:fs/promises'
-import * as zlib from 'node:zlib'
 import { json2csv } from 'json-2-csv'
 import { PoolClient } from 'pg'
 import { compressFile } from '../utils/compress-file'
 import { DbKind } from '../types'
-import { ensureBackupDirectoryExists, writeEncryptedDataToFile } from './common'
+import {
+  ensureBackupDirectoryExists,
+  generateFileName,
+  writeEncryptedDataToFile,
+} from './common'
 
 const query = `SELECT
     schemaname AS schema,
@@ -48,9 +49,7 @@ export const postgresHandler = async (data: Backup) => {
   }
 
   targetTables.forEach(async (ttable: Table) => {
-    const fileName = `./backup/${data.backupName}_${Math.floor(
-      Math.random() * 100,
-    )}_${ttable.name}`
+    const fileName = generateFileName(data.backupName, ttable.name)
 
     await backup({ db, table: ttable, data, fileName })
     compressFile(fileName)

@@ -1,6 +1,11 @@
 import * as express from 'express'
-import { dumpSchemaValidator, validate } from './validators'
-import { dumpHandler } from './db-handlers/globalhander'
+import {
+  dumpSchemaValidator,
+  validate,
+  restoreSchemaValidator,
+} from './validators'
+import restoreHandler from './db-handlers/restoreHandler'
+import dumpHandler from './db-handlers/dumpHandler'
 
 const app = express()
 
@@ -12,6 +17,7 @@ app.use((req, _, next) => {
 })
 
 app.post('/dump', validate(dumpSchemaValidator), dumpHandler)
+app.post('/restore', validate(restoreSchemaValidator), restoreHandler)
 
 const PORT = process.env.PORT ?? 9000
 app.listen(PORT, () => {

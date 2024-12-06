@@ -14,3 +14,9 @@ export const writeEncryptedDataToFile = async (fileName: string, data: any) => {
   })
   console.log('done writing to file.')
 }
+
+export const generateFileName = (backupName: string, tableName: string) => {
+  return `./backup/${backupName}_${Math.floor(
+    Math.random() * 100,
+  )}_${tableName}`
+}

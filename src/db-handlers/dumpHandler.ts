@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import { Backup } from '../validators'
 import { DbKind } from '../types'
-import { postgresHandler } from './postgres'
+import { Backup } from '../validators'
 import { mongoDBHandler } from './mongodb'
+import { postgresHandler } from './postgres'
 
-export const dumpHandler = async (req: Request, res: Response) => {
+export default async function dumpHandler(req: Request, res: Response) {
   const scheduledBackups = req.body.parameters as Backup[]
 
   if (!scheduledBackups) {
@@ -25,8 +25,4 @@ export const dumpHandler = async (req: Request, res: Response) => {
     }
   }
   res.end(JSON.stringify(results))
-}
-
-export const restoreHandler = async (req: Request, res: Response) => {
-  res.end('Not implemented yet')
 }

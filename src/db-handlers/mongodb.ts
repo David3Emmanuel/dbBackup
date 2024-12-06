@@ -1,11 +1,14 @@
 import { Backup } from '../validators'
 import { connectToDb } from './connect-to-db'
-import * as fs from 'node:fs/promises'
 import { json2csv } from 'json-2-csv'
 import { compressFile } from '../utils/compress-file'
 import { DbKind } from '../types'
 import { CollectionInfo, Db as MongoDb } from 'mongodb'
-import { ensureBackupDirectoryExists, writeEncryptedDataToFile } from './common'
+import {
+  ensureBackupDirectoryExists,
+  generateFileName,
+  writeEncryptedDataToFile,
+} from './common'
 
 export const mongoDBHandler = async (data: Backup) => {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
@@ -30,9 +33,7 @@ export const mongoDBHandler = async (data: Backup) => {
   }
 
   targetCollections.forEach(async (collection) => {
-    const fileName = `./backup/${data.backupName}_${Math.floor(
-      Math.random() * 100,
-    )}_${collection.name}`
+    const fileName = generateFileName(data.backupName, collection.name)
 
     await backup({ db, collection, fileName })
     compressFile(fileName)
