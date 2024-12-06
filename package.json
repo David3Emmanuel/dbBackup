@@ -1,5 +1,5 @@
 {
-	"name": "Db-Utility",
+	"name": "db-utility",
 	"version": "1.0.0",
 	"description": "Database Backup Management DbUtility",
 	"main": "dist/main",
@@ -18,7 +18,10 @@
 	"keywords": [
 		"hatchdev"
 	],
-	"author": "github.com/tdadadavid",
+	"author": "David3Emmanuel",
+	"contributors": [
+		"github.com/tdadadavid"
+	],
 	"license": "ISC",
 	"dependencies": {
 		"@types/bcryptjs": "^2.4.6",
