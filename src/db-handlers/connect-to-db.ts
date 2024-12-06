@@ -2,14 +2,21 @@ import { Backup } from '../validators/dump-schema'
 import { MongoClient, Db as MongoDb } from 'mongodb'
 import { Pool, PoolClient } from 'pg'
 import { DbKind } from '../types'
-import assert from 'node:assert'
 
 export const connectToDb = async <T extends MongoDb | PoolClient>(
   data: Backup,
   type: DbKind,
 ): Promise<T> => {
-  const { username, databaseName, host, port, password, useSrv, queryParams } =
-    data
+  const {
+    username,
+    databaseName,
+    host,
+    port,
+    password,
+    useSrv,
+    queryParams,
+    pg_ssl,
+  } = data
 
   if (type === DbKind.Mongodb) {
     const protocol = useSrv ? 'mongodb+srv' : 'mongodb'
@@ -20,13 +27,14 @@ export const connectToDb = async <T extends MongoDb | PoolClient>(
     await client.connect()
     return client.db(databaseName) as T
   } else if (type === DbKind.Postgres) {
-    assert(port, 'Port is required for Postgres')
+    if (!port) throw new Error('Port is required for Postgres')
     const pool = new Pool({
       user: username,
       host,
       database: databaseName,
       password,
       port,
+      ssl: pg_ssl,
     })
     const client = await pool.connect()
     return client as T
