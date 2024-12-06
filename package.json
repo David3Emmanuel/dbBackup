@@ -7,11 +7,13 @@
 		"test": "tests"
 	},
 	"scripts": {
-		"build:prod": "tsc -p tsconfig.json",
-		"build:dev": "tsc -p tsconfig.json",
+		"build:prod": "npm run clean && tsc -p tsconfig.json",
+		"build:dev": "npm run clean && tsc -p tsconfig.json",
 		"clean": "rimraf tsconfig.tsbuildinfo ./dist",
-		"start:prod": "npm run clean && npm run build:prod && NODE_ENV=production && node dist/main",
-		"start:dev": "npm run clean && npm run build:dev && nodemon dist/main"
+		"start:prod": "NODE_ENV=production && node dist/main",
+		"start:dev": "nodemon dist/main",
+		"start": "npm run build:prod && npm run start:prod",
+		"dev": "npm run build:dev && npm run start:dev"
 	},
 	"keywords": [
 		"hatchdev"
