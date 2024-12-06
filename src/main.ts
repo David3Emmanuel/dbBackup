@@ -1,4 +1,6 @@
 import * as express from 'express'
+import * as dotenv from 'dotenv'
+
 import {
   dumpSchemaValidator,
   validate,
@@ -7,6 +9,7 @@ import {
 import restoreHandler from './db-handlers/restoreHandler'
 import dumpHandler from './db-handlers/dumpHandler'
 
+dotenv.config()
 const app = express()
 
 app.use(express.json())
