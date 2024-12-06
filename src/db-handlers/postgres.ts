@@ -28,7 +28,7 @@ interface Table {
   owner: string
 }
 
-export const postgresHandler = async (data: Backup) => {
+export const postgresBackupHandler = async (data: Backup) => {
   const db = await connectToDb<PoolClient>(data, DbKind.Postgres)
 
   await ensureBackupDirectoryExists()

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
 import { DbKind } from '../types'
 import { Backup } from '../validators'
-import { mongoDBHandler } from './mongodb'
-import { postgresHandler } from './postgres'
+import { mongoDBBackupHandler } from './mongodb'
+import { postgresBackupHandler } from './postgres'
 
 export default async function dumpHandler(req: Request, res: Response) {
   const scheduledBackups = req.body.parameters as Backup[]
@@ -17,10 +17,10 @@ export default async function dumpHandler(req: Request, res: Response) {
   let results: any[] = []
   for (let backup of scheduledBackups) {
     if (backup.dbKind == DbKind.Postgres) {
-      let result = await postgresHandler(backup)
+      let result = await postgresBackupHandler(backup)
       results.push(result)
     } else if (backup.dbKind == DbKind.Mongodb) {
-      let result = await mongoDBHandler(backup)
+      let result = await mongoDBBackupHandler(backup)
       results.push(result)
     }
   }

@@ -10,7 +10,7 @@ import {
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
 
-export const mongoDBHandler = async (data: Backup) => {
+export const mongoDBBackupHandler = async (data: Backup) => {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
 
   await ensureBackupDirectoryExists()
