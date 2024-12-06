@@ -17,12 +17,17 @@ export default async function restoreHandler(req: Request, res: Response) {
 
   let results: any[] = []
   for (let restore of restores) {
-    if (restore.dbKind == DbKind.Postgres) {
-      let result = await postgresRestoreHandler(restore, overwrite)
-      results.push(result)
-    } else if (restore.dbKind == DbKind.Mongodb) {
-      let result = await mongoDBRestoreHandler(restore, overwrite)
-      results.push(result)
+    try {
+      if (restore.dbKind == DbKind.Postgres) {
+        let result = await postgresRestoreHandler(restore, overwrite)
+        results.push(result)
+      } else if (restore.dbKind == DbKind.Mongodb) {
+        let result = await mongoDBRestoreHandler(restore, overwrite)
+        results.push(result)
+      }
+    } catch (e) {
+      res.status(207)
+      results.push({ error: 'Backup not found', versionId: restore.versionId })
     }
   }
   res.end(JSON.stringify(results))
