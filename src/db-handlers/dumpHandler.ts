@@ -34,7 +34,8 @@ registerRoute(dumpRouter, {
   method: 'post',
   description: 'Backup the database',
   handler: dumpHandler,
-  path: '/dump',
+  path: '/',
+  fullPath: '/dump',
   summary: 'Backup the database',
   schema: dumpSchemaValidator,
 })

@@ -72,6 +72,7 @@ class DocBuilder {
     {
       method,
       path,
+      fullPath,
       schema = {},
       handler,
       middlewares = [],
@@ -81,6 +82,7 @@ class DocBuilder {
     }: {
       method: 'get' | 'post' | 'put' | 'delete'
       path: string
+      fullPath: string
       schema?: SchemaMapWithResponses
       handler: RequestHandler
       middlewares?: RequestHandler[]
@@ -103,7 +105,7 @@ class DocBuilder {
       parameters.push(
         ...Object.keys(paramsSwagger.properties).map((key) => ({
           name: key,
-          in: path,
+          in: fullPath,
           required: schema.params?._flags.presence === 'required',
           schema: paramsSwagger.properties[key],
           description: paramsSwagger.properties[key].description,
@@ -134,7 +136,7 @@ class DocBuilder {
     }
 
     this.routes.push({
-      path,
+      path: fullPath,
       method,
       summary,
       description,

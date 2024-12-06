@@ -70,7 +70,8 @@ registerRoute(restoreRouter, {
   method: 'post',
   description: 'Restore the database',
   handler: restoreHandler,
-  path: '/restore',
+  path: '/',
+  fullPath: '/restore',
   summary: 'Restore the database',
   schema: restoreSchemaValidator,
 })
