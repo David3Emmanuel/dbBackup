@@ -1,11 +1,9 @@
 import * as express from 'express'
 import * as dotenv from 'dotenv'
 
-import restoreHandler from './db-handlers/restoreHandler'
-import dumpHandler from './db-handlers/dumpHandler'
-import { validate } from './validators/middleware'
-import { dumpSchemaValidator } from './validators/dump-schema'
-import { restoreSchemaValidator } from './validators/restore-schema'
+import restoreRouter from './db-handlers/restoreHandler'
+import dumpRouter from './db-handlers/dumpHandler'
+import { swaggerRouter, generateDocs, swaggerConfig } from './swagger'
 
 dotenv.config()
 const app = express()
@@ -17,8 +15,19 @@ app.use((req, _, next) => {
   next()
 })
 
-app.post('/dump', validate(dumpSchemaValidator), dumpHandler)
-app.post('/restore', validate(restoreSchemaValidator), restoreHandler)
+app.use('/dump', dumpRouter)
+app.use('/restore', restoreRouter)
+
+swaggerConfig({
+  info: {
+    title: 'Database Backup and Restore API',
+    version: '1.0.0',
+  },
+})
+
+generateDocs()
+
+app.use('/docs', swaggerRouter())
 
 const PORT = process.env.PORT ?? 9000
 app.listen(PORT, () => {

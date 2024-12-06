@@ -1,10 +1,13 @@
-import { Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 import { DbKind } from '../types'
-import { Backup } from '../validators/dump-schema'
+import { Backup, dumpSchemaValidator } from '../validators/dump-schema'
 import { mongoDBBackupHandler } from './mongodb'
 import { postgresBackupHandler } from './postgres'
+import { registerRoute } from '../swagger'
 
-export default async function dumpHandler(req: Request, res: Response) {
+const dumpRouter = Router()
+
+const dumpHandler = async (req: Request, res: Response) => {
   const scheduledBackups = req.body.parameters as Backup[]
 
   if (!scheduledBackups) {
@@ -26,3 +29,14 @@ export default async function dumpHandler(req: Request, res: Response) {
   }
   res.end(JSON.stringify(results))
 }
+
+registerRoute(dumpRouter, {
+  method: 'post',
+  description: 'Backup the database',
+  handler: dumpHandler,
+  path: '/dump',
+  summary: 'Backup the database',
+  schema: dumpSchemaValidator,
+})
+
+export default dumpRouter

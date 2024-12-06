@@ -10,6 +10,10 @@ export enum SchemaKey {
 
 export type SchemaMap = Partial<Record<SchemaKey, Joi.Schema>>
 
+export type SchemaMapWithResponses = SchemaMap & {
+  responses?: Record<number, Joi.Schema>
+}
+
 export function validate(schema: SchemaMap) {
   return (request: Request, response: Response, nextFunction: NextFunction) => {
     const validationOptions = {

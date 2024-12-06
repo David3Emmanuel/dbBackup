@@ -1,10 +1,11 @@
-import { Request, Response } from 'express'
-import { Restore } from '../validators/restore-schema'
+import { Request, Response, Router } from 'express'
+import { Restore, restoreSchemaValidator } from '../validators/restore-schema'
 import { mongoDBRestoreHandler } from './mongodb'
 import { postgresRestoreHandler } from './postgres'
 import { DbKind } from '../types'
 import * as fs from 'fs'
 import * as path from 'path'
+import { registerRoute } from '../swagger'
 
 async function getTablesToRestore(restore: Restore): Promise<string[]> {
   if (!restore.targetTables || restore.targetTables.length === 0) {
@@ -23,7 +24,9 @@ async function getTablesToRestore(restore: Restore): Promise<string[]> {
   }
 }
 
-export default async function restoreHandler(req: Request, res: Response) {
+const restoreRouter = Router()
+
+const restoreHandler = async (req: Request, res: Response) => {
   const restores = req.body.parameters as Restore[]
   const overwrite = req.body.overwrite as boolean
 
@@ -62,3 +65,14 @@ export default async function restoreHandler(req: Request, res: Response) {
   }
   res.end(JSON.stringify(results))
 }
+
+registerRoute(restoreRouter, {
+  method: 'post',
+  description: 'Restore the database',
+  handler: restoreHandler,
+  path: '/restore',
+  summary: 'Restore the database',
+  schema: restoreSchemaValidator,
+})
+
+export default restoreRouter
