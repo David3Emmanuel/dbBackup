@@ -3,20 +3,19 @@ import { Restore, restoreSchemaValidator } from '../validators/restore-schema'
 import { mongoDBRestoreHandler } from './mongodb'
 import { postgresRestoreHandler } from './postgres'
 import { DbKind } from '../types'
-import * as fs from 'fs'
-import * as path from 'path'
 import { registerRoute } from '../swagger'
+import storage from '../storage'
 
 async function getTablesToRestore(restore: Restore): Promise<string[]> {
   if (!restore.targetTables || restore.targetTables.length === 0) {
-    const backupDir = path.join(__dirname, '../../backup')
-    const files = fs.readdirSync(backupDir)
+    const files = await storage.listFiles()
+    console.log(files)
     const regex = new RegExp(
       `${restore.backupName}_${restore.versionId}_${restore.databaseName}.(.*).gz$`,
     )
     const tablesToRestore = files
-      .filter((file) => regex.test(file))
-      .map((file) => regex.exec(file)![1])
+      .filter((file) => regex.test(file.name))
+      .map((file) => regex.exec(file.name)![1])
     if (tablesToRestore.length === 0) throw new Error('Backup not found')
     return tablesToRestore
   } else {
