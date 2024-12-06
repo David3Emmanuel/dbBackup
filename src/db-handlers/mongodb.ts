@@ -1,12 +1,14 @@
-import { Backup } from '../validators'
+import { Backup, Restore } from '../validators'
 import { connectToDb } from './connect-to-db'
-import { json2csv } from 'json-2-csv'
-import { compressFile } from '../utils/compress'
+import { csv2json, json2csv } from 'json-2-csv'
+import { compressFile, uncompressFile } from '../utils/compress'
 import { DbKind } from '../types'
 import { CollectionInfo, Db as MongoDb } from 'mongodb'
 import {
+  deleteEncryptedDataFile,
   ensureBackupDirectoryExists,
   generateFileName,
+  readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
 
@@ -34,7 +36,7 @@ export const mongoDBBackupHandler = async (data: Backup) => {
 
   const versionId = Math.floor(Math.random() * 100)
 
-  targetCollections.forEach(async (collection) => {
+  const promises = targetCollections.map(async (collection) => {
     const fileName = generateFileName(
       data.backupName,
       data.databaseName,
@@ -43,8 +45,10 @@ export const mongoDBBackupHandler = async (data: Backup) => {
     )
 
     await backup({ db, collection, fileName })
-    compressFile(fileName)
   })
+  await Promise.all(promises)
+
+  return versionId
 }
 
 const backup = async ({
@@ -57,7 +61,43 @@ const backup = async ({
   fileName: string
 }) => {
   const collectionData = await db.collection(collection.name).find().toArray()
-  const csvResult = await json2csv(collectionData)
+  const csvResult = json2csv(collectionData)
 
   await writeEncryptedDataToFile(fileName, csvResult)
+  await compressFile(fileName)
+  await deleteEncryptedDataFile(fileName)
+}
+
+export async function mongoDBRestoreHandler(data: Restore, overwrite: boolean) {
+  const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
+
+  const { backupName, databaseName, targetTables, versionId } = data
+  const promises = targetTables.map(async (tableName) => {
+    const fileName = generateFileName(
+      backupName,
+      databaseName,
+      tableName,
+      versionId,
+    )
+    const contents = await restore(fileName)
+    const bulkOps = contents.map((doc: object & { _id: any }) => ({
+      updateOne: {
+        filter: { _id: doc._id },
+        update: { $set: doc },
+        upsert: true,
+      },
+    }))
+    await db.collection(tableName).bulkWrite(bulkOps)
+    console.log(`Restored data to collection ${tableName}`)
+    return tableName
+  })
+  return Promise.all(promises)
+}
+
+async function restore(fileName: string) {
+  await uncompressFile(fileName + '.gz')
+  const data = await readDecryptedDataFromFile(fileName)
+  deleteEncryptedDataFile(fileName)
+  const contents = csv2json(data)
+  return contents
 }

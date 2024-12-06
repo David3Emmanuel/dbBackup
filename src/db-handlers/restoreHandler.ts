@@ -1,13 +1,12 @@
 import { Request, Response } from 'express'
 import { Restore } from '../validators'
-import {
-  generateFileName,
-  readDecryptedDataFromFile,
-} from '../utils/backup_restore'
-import { csv2json } from 'json-2-csv'
+import { mongoDBRestoreHandler } from './mongodb'
+import { postgresRestoreHandler } from './postgres'
+import { DbKind } from '../types'
 
 export default async function restoreHandler(req: Request, res: Response) {
   const restores = req.body.parameters as Restore[]
+  const overwrite = req.body.overwrite as boolean
 
   if (!restores) {
     res
@@ -18,26 +17,13 @@ export default async function restoreHandler(req: Request, res: Response) {
 
   let results: any[] = []
   for (let restore of restores) {
-    let result = await genericHandler(restore)
-    console.log(result)
-    results.push(result)
+    if (restore.dbKind == DbKind.Postgres) {
+      let result = await postgresRestoreHandler(restore, overwrite)
+      results.push(result)
+    } else if (restore.dbKind == DbKind.Mongodb) {
+      let result = await mongoDBRestoreHandler(restore, overwrite)
+      results.push(result)
+    }
   }
   res.end(JSON.stringify(results))
-}
-
-async function genericHandler(data: Restore) {
-  const { backupName, databaseName, targetTables, versionId } = data
-  const promises = targetTables.map(async (tableName) => {
-    const fileName = generateFileName(
-      backupName,
-      databaseName,
-      tableName,
-      versionId,
-    )
-    const data = await readDecryptedDataFromFile(fileName)
-    const contents = csv2json(data)
-    console.log(contents)
-    return { tableName, contents }
-  })
-  return Promise.all(promises)
 }

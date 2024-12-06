@@ -15,6 +15,10 @@ export const writeEncryptedDataToFile = async (fileName: string, data: any) => {
   console.log('done writing to file.', fileName)
 }
 
+export const deleteEncryptedDataFile = async (fileName: string) => {
+  await fs.unlink(fileName)
+}
+
 export const readDecryptedDataFromFile = async (fileName: string) => {
   const encryptor = new Encryptor()
   const encryptedData = await fs.readFile(fileName, { encoding: 'utf8' })

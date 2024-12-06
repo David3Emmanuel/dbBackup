@@ -2,6 +2,7 @@ import * as Joi from 'joi'
 import { DbKind } from '../types'
 
 export const restoreSchemaValidator = Joi.object({
+  overwrite: Joi.bool().default(false),
   parameters: Joi.array().items({
     host: Joi.string().required(),
     port: Joi.number(),

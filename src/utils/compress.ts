@@ -1,30 +1,21 @@
 import * as fs from 'fs'
 import * as zlib from 'zlib'
+import { promisify } from 'util'
 
-export const compressFile = (filePath: string) => {
-  // Create a Gzip compression stream
+const pipeline = promisify(require('stream').pipeline)
+
+export const compressFile = async (filePath: string) => {
   const gzip = zlib.createGzip()
-
-  // Read the input file
   const input = fs.createReadStream(filePath)
-
-  // Write the compressed output to a new file
   const output = fs.createWriteStream(`${filePath}.gz`)
 
-  // Pipe the input through Gzip and write to the output
-  input.pipe(gzip).pipe(output)
+  await pipeline(input, gzip, output)
 }
 
-export const uncompressFile = (filePath: string) => {
-  // Create a Gunzip decompression stream
+export const uncompressFile = async (filePath: string) => {
   const gunzip = zlib.createGunzip()
-
-  // Read the input file
   const input = fs.createReadStream(filePath)
-
-  // Write the decompressed output to a new file
   const output = fs.createWriteStream(filePath.replace(/\.gz$/, ''))
 
-  // Pipe the input through Gunzip and write to the output
-  input.pipe(gunzip).pipe(output)
+  await pipeline(input, gunzip, output)
 }

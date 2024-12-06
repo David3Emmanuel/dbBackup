@@ -1,12 +1,14 @@
-import { Backup } from '../validators'
+import { Backup, Restore } from '../validators'
 import { connectToDb } from './connect-to-db'
-import { json2csv } from 'json-2-csv'
+import { csv2json, json2csv } from 'json-2-csv'
 import { PoolClient } from 'pg'
-import { compressFile } from '../utils/compress'
+import { compressFile, uncompressFile } from '../utils/compress'
 import { DbKind } from '../types'
 import {
+  deleteEncryptedDataFile,
   ensureBackupDirectoryExists,
   generateFileName,
+  readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
 
@@ -58,7 +60,6 @@ export const postgresBackupHandler = async (data: Backup) => {
     )
 
     await backup({ db, table: ttable, data, fileName })
-    compressFile(fileName)
   })
 }
 
@@ -74,7 +75,52 @@ const backup = async ({
   fileName: string
 }) => {
   const tableData = await db.query(`SELECT * FROM "${table.name}"`)
-  const csvResult = await json2csv(tableData.rows as any[])
+  const csvResult = json2csv(tableData.rows as any[])
 
   await writeEncryptedDataToFile(fileName, csvResult)
+  await compressFile(fileName)
+  await deleteEncryptedDataFile(fileName)
+}
+
+export async function postgresRestoreHandler(
+  data: Restore,
+  overwrite: boolean,
+) {
+  const db = await connectToDb<PoolClient>(data, DbKind.Postgres)
+
+  const { backupName, databaseName, targetTables, versionId } = data
+  const promises = targetTables.map(async (tableName) => {
+    const fileName = generateFileName(
+      backupName,
+      databaseName,
+      tableName,
+      versionId,
+    )
+    const contents = await restore(fileName)
+    const columns = Object.keys(contents[0]).join(', ')
+    const values = contents
+      .map(
+        (row) =>
+          `(${Object.values(row)
+            .map((value) => `'${value}'`)
+            .join(', ')})`,
+      )
+      .join(', ')
+    const updateQuery = `INSERT INTO "${tableName}" (${columns}) VALUES ${values} ON CONFLICT (id) DO UPDATE SET ${columns
+      .split(', ')
+      .map((col) => `${col} = EXCLUDED.${col}`)
+      .join(', ')}`
+    await db.query(updateQuery)
+    console.log(`Restored data to table ${tableName}`)
+    return tableName
+  })
+  return Promise.all(promises)
+}
+
+async function restore(fileName: string) {
+  await uncompressFile(fileName + '.gz')
+  const data = await readDecryptedDataFromFile(fileName)
+  deleteEncryptedDataFile(fileName)
+  const contents = csv2json(data)
+  return contents
 }
