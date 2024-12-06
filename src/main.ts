@@ -1,15 +1,19 @@
-import * as express from "express";
-import { dumpSchemaValidator, validate } from "./validators";
-import { dumpHandler } from "./db-handlers/globalhander";
+import * as express from 'express'
+import { dumpSchemaValidator, validate } from './validators'
+import { dumpHandler } from './db-handlers/globalhander'
 
-const app = express();
+const app = express()
 
-// understand json request.
-app.use(express.json());
+app.use(express.json())
 
-app.post("/dump", validate(dumpSchemaValidator), dumpHandler);
+app.use((req, _, next) => {
+  console.log(`${req.method} ${req.url}`)
+  next()
+})
 
-const PORT = process.env.PORT ?? 9000;
+app.post('/dump', validate(dumpSchemaValidator), dumpHandler)
+
+const PORT = process.env.PORT ?? 9000
 app.listen(PORT, () => {
-  console.log(`Server started on ${PORT}`);
-});
+  console.log(`Server started on ${PORT}`)
+})
