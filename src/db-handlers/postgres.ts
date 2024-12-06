@@ -11,6 +11,8 @@ import {
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const query = `SELECT
     schemaname AS schema,
@@ -83,18 +85,12 @@ const backup = async ({
 export async function postgresRestoreHandler(
   data: Restore,
   overwrite: boolean,
+  tablesToRestore: string[],
 ) {
   const db = await connectToDb<PoolClient>(data, DbKind.Postgres)
+  await ensureBackupDirectoryExists()
 
-  const { backupName, databaseName, targetTables, versionId } = data
-  let tablesToRestore: string[] = []
-
-  if (!targetTables || targetTables.length === 0) {
-    const result = await db.query(query)
-    tablesToRestore = result.rows.map((table: Table) => table.name)
-  } else {
-    tablesToRestore = targetTables
-  }
+  const { backupName, databaseName, versionId } = data
 
   const promises = tablesToRestore.map(async (tableName) => {
     const fileName = generateFileName(

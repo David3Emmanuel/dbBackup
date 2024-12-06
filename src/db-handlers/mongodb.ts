@@ -11,6 +11,8 @@ import {
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
+import * as fs from 'fs'
+import * as path from 'path'
 
 export const mongoDBBackupHandler = async (data: Backup) => {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
@@ -66,18 +68,15 @@ const backup = async ({
   await deleteEncryptedDataFile(fileName)
 }
 
-export async function mongoDBRestoreHandler(data: Restore, overwrite: boolean) {
+export async function mongoDBRestoreHandler(
+  data: Restore,
+  overwrite: boolean,
+  collectionsToRestore: string[],
+) {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)
+  await ensureBackupDirectoryExists()
 
-  const { backupName, databaseName, targetTables, versionId } = data
-  let collectionsToRestore: string[] = []
-
-  if (!targetTables || targetTables.length === 0) {
-    const collections = await db.listCollections().toArray()
-    collectionsToRestore = collections.map((collection) => collection.name)
-  } else {
-    collectionsToRestore = targetTables
-  }
+  const { backupName, databaseName, versionId } = data
 
   const promises = collectionsToRestore.map(async (tableName) => {
     const fileName = generateFileName(
