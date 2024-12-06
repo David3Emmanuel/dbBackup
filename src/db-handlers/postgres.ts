@@ -2,13 +2,13 @@ import { Backup } from '../validators'
 import { connectToDb } from './connect-to-db'
 import { json2csv } from 'json-2-csv'
 import { PoolClient } from 'pg'
-import { compressFile } from '../utils/compress-file'
+import { compressFile } from '../utils/compress'
 import { DbKind } from '../types'
 import {
   ensureBackupDirectoryExists,
   generateFileName,
   writeEncryptedDataToFile,
-} from '../utils/backup'
+} from '../utils/backup_restore'
 
 const query = `SELECT
     schemaname AS schema,
@@ -47,9 +47,15 @@ export const postgresHandler = async (data: Backup) => {
   } else {
     targetTables = tables
   }
+  const versionId = Math.floor(Math.random() * 100)
 
   targetTables.forEach(async (ttable: Table) => {
-    const fileName = generateFileName(data.backupName, ttable.name)
+    const fileName = generateFileName(
+      data.backupName,
+      data.databaseName,
+      ttable.name,
+      versionId,
+    )
 
     await backup({ db, table: ttable, data, fileName })
     compressFile(fileName)
