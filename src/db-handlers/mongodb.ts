@@ -1,4 +1,6 @@
-import { Backup, Restore } from '../validators'
+import { Backup } from '../validators/dump-schema'
+import { Restore } from '../validators/restore-schema'
+
 import { connectToDb } from './connect-to-db'
 import { csv2json, json2csv } from 'json-2-csv'
 import { compressFile, uncompressFile } from '../utils/compress'

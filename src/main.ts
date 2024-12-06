@@ -1,13 +1,11 @@
 import * as express from 'express'
 import * as dotenv from 'dotenv'
 
-import {
-  dumpSchemaValidator,
-  validate,
-  restoreSchemaValidator,
-} from './validators'
 import restoreHandler from './db-handlers/restoreHandler'
 import dumpHandler from './db-handlers/dumpHandler'
+import { validate } from './validators/middleware'
+import { dumpSchemaValidator } from './validators/dump-schema'
+import { restoreSchemaValidator } from './validators/restore-schema'
 
 dotenv.config()
 const app = express()

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { Restore } from '../validators'
+import { Restore } from '../validators/restore-schema'
 import { mongoDBRestoreHandler } from './mongodb'
 import { postgresRestoreHandler } from './postgres'
 import { DbKind } from '../types'

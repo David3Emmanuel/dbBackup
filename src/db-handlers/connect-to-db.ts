@@ -1,4 +1,4 @@
-import { Backup } from '../validators'
+import { Backup } from '../validators/dump-schema'
 import { MongoClient, Db as MongoDb } from 'mongodb'
 import { Pool, PoolClient } from 'pg'
 import { DbKind } from '../types'

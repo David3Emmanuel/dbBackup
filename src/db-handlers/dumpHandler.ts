@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { DbKind } from '../types'
-import { Backup } from '../validators'
+import { Backup } from '../validators/dump-schema'
 import { mongoDBBackupHandler } from './mongodb'
 import { postgresBackupHandler } from './postgres'
 
