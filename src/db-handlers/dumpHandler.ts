@@ -14,7 +14,7 @@ export default async function dumpHandler(req: Request, res: Response) {
     return
   }
 
-  let results: any[] = []
+  let results: number[] = []
   for (let backup of scheduledBackups) {
     if (backup.dbKind == DbKind.Postgres) {
       let result = await postgresBackupHandler(backup)

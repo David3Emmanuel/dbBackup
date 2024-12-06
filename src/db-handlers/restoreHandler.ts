@@ -34,7 +34,7 @@ export default async function restoreHandler(req: Request, res: Response) {
     return
   }
 
-  let results: any[] = []
+  let results: (string[] | { error: string; versionId: number })[] = []
   for (let restore of restores) {
     try {
       const tablesToRestore = await getTablesToRestore(restore)

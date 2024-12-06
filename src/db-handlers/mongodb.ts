@@ -11,8 +11,6 @@ import {
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
-import * as fs from 'fs'
-import * as path from 'path'
 
 export const mongoDBBackupHandler = async (data: Backup) => {
   const db = await connectToDb<MongoDb>(data, DbKind.Mongodb)

@@ -11,8 +11,6 @@ import {
   readDecryptedDataFromFile,
   writeEncryptedDataToFile,
 } from '../utils/backup_restore'
-import * as fs from 'fs'
-import * as path from 'path'
 
 const query = `SELECT
     schemaname AS schema,
@@ -61,6 +59,8 @@ export const postgresBackupHandler = async (data: Backup) => {
 
     await backup({ db, table: ttable, data, fileName })
   })
+
+  return versionId
 }
 
 const backup = async ({
