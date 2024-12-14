@@ -19,7 +19,7 @@ export const restoreSchemaValidator = {
       password: Joi.string().required(),
       useSrv: Joi.bool().default(false),
       queryParams: Joi.string(),
-      pg_ssl: Joi.object().unknown(true),
+      ssl: Joi.object().unknown(true),
     }),
   }),
 } satisfies SchemaMap
@@ -36,5 +36,5 @@ export interface Restore {
   password: string
   useSrv?: boolean
   queryParams?: string
-  pg_ssl?: any
+  ssl?: any
 }

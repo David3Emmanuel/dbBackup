@@ -16,7 +16,7 @@ export const connectToDb = async <T extends MongoDb | PoolClient | Connection>(
     password,
     useSrv,
     queryParams,
-    pg_ssl,
+    ssl,
   } = data
 
   if (type === DbKind.Mongodb) {
@@ -35,17 +35,19 @@ export const connectToDb = async <T extends MongoDb | PoolClient | Connection>(
       database: databaseName,
       password,
       port,
-      ssl: pg_ssl,
+      ssl,
     })
     const client = await pool.connect()
     return client as T
   } else if (type === DbKind.Mysql) {
+    if (!port) throw new Error('Port is required for MySQL')
     const connection = await createConnection({
       host,
       user: username,
       database: databaseName,
       password,
       port,
+      ssl,
     })
     return connection as T
   } else {
