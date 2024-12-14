@@ -1,9 +1,10 @@
 import { Backup } from '../validators/dump-schema'
 import { MongoClient, Db as MongoDb } from 'mongodb'
 import { Pool, PoolClient } from 'pg'
+import { createConnection, Connection } from 'mysql2/promise'
 import { DbKind } from '../types'
 
-export const connectToDb = async <T extends MongoDb | PoolClient>(
+export const connectToDb = async <T extends MongoDb | PoolClient | Connection>(
   data: Backup,
   type: DbKind,
 ): Promise<T> => {
@@ -38,6 +39,15 @@ export const connectToDb = async <T extends MongoDb | PoolClient>(
     })
     const client = await pool.connect()
     return client as T
+  } else if (type === DbKind.Mysql) {
+    const connection = await createConnection({
+      host,
+      user: username,
+      database: databaseName,
+      password,
+      port,
+    })
+    return connection as T
   } else {
     throw new Error('Unsupported database type')
   }
