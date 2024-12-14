@@ -10,7 +10,7 @@ export const dumpSchemaValidator = {
       username: Joi.string().required(),
       databaseName: Joi.string().required(),
       backupName: Joi.string(),
-      dbKind: Joi.valid(DbKind.Postgres, DbKind.Mongodb).default(
+      dbKind: Joi.valid(DbKind.Postgres, DbKind.Mongodb, DbKind.Mysql).default(
         DbKind.Postgres,
       ),
       enableAutomaticBackupScheduling: Joi.bool().default(false),
