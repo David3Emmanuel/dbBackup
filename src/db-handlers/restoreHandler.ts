@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express'
 import { Restore, restoreSchemaValidator } from '../validators/restore-schema'
 import { mongoDBRestoreHandler } from './mongodb'
 import { postgresRestoreHandler } from './postgres'
+import { mysqlRestoreHandler } from './mysql'
 import { DbKind } from '../types'
 import { registerRoute } from '../swagger'
 import storage from '../storage'
@@ -50,6 +51,13 @@ const restoreHandler = async (req: Request, res: Response) => {
         results.push(result)
       } else if (restore.dbKind == DbKind.Mongodb) {
         let result = await mongoDBRestoreHandler(
+          restore,
+          overwrite,
+          tablesToRestore,
+        )
+        results.push(result)
+      } else if (restore.dbKind == DbKind.Mysql) {
+        let result = await mysqlRestoreHandler(
           restore,
           overwrite,
           tablesToRestore,

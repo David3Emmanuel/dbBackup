@@ -3,6 +3,7 @@ import { DbKind } from '../types'
 import { Backup, dumpSchemaValidator } from '../validators/dump-schema'
 import { mongoDBBackupHandler } from './mongodb'
 import { postgresBackupHandler } from './postgres'
+import { mysqlBackupHandler } from './mysql'
 import { registerRoute } from '../swagger'
 
 const dumpRouter = Router()
@@ -24,6 +25,9 @@ const dumpHandler = async (req: Request, res: Response) => {
       results.push(result)
     } else if (backup.dbKind == DbKind.Mongodb) {
       let result = await mongoDBBackupHandler(backup)
+      results.push(result)
+    } else if (backup.dbKind == DbKind.Mysql) {
+      let result = await mysqlBackupHandler(backup)
       results.push(result)
     }
   }
